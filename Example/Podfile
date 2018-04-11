@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'CCUIModel_Example' do
+  pod 'CCUIModel', :path => '../'
+
+  target 'CCUIModel_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end

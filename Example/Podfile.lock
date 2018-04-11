@@ -1,0 +1,19 @@
+PODS:
+  - CCUIModel (0.0.1):
+    - CircleReferenceCheck
+  - CircleReferenceCheck (0.0.1)
+
+DEPENDENCIES:
+  - CCUIModel (from `../`)
+
+EXTERNAL SOURCES:
+  CCUIModel:
+    :path: ../
+
+SPEC CHECKSUMS:
+  CCUIModel: cdae7aa9e4fa773b4d8efa70895d23ba108fd0b4
+  CircleReferenceCheck: 5ef0dbaff301108a523f845bf81dfa9a12a83024
+
+PODFILE CHECKSUM: 2f760555e03d5bdfd6e4276ff7b7f49509d62555
+
+COCOAPODS: 1.4.0.rc.1
