@@ -233,7 +233,7 @@ static void notiferListener(NSArray* relations, NSObject* notifer, id value, NSS
 
 #if DEBUG
             NSString *assertStr = [NSString stringWithFormat:@"property %@ %@ type in lisener %@ can not be setted %@ type. You may set an incompatible object to specific property in its binding notifier model.", relation.listenerProp, relation.listenerPropClass, [relation.listener class], [result class]];
-            NSCAssert([result isKindOfClass:relation.listenerPropClass] == YES, assertStr);
+            NSCAssert(result == nil || [result isKindOfClass:relation.listenerPropClass] == YES , assertStr);
 #else
             if ([result isKindOfClass:relation.listenerPropClass] == NO)
             {
@@ -369,7 +369,7 @@ void checkValidType(id self, SEL _cmd, id value)
                 }
                 
                 NSString *assertStr = [NSString stringWithFormat:@"property %s %@ type in %@ can not be setted %@ type", propertyName, typeStr, [self class], [value class]];
-                NSCAssert((BOOL)[value isKindOfClass:NSClassFromString(typeStr)] == YES, assertStr);
+                NSCAssert(value == nil || [value isKindOfClass:NSClassFromString(typeStr)] == YES, assertStr);
                 
                 break;
             }
@@ -478,7 +478,7 @@ static void replaced_listener_setter_id_IMP(__unsafe_unretained id self, SEL _cm
             {
 #if DEBUG
                 NSString *assertStr = [NSString stringWithFormat:@"method %@ argument %@ type in lisener %@ can not be setted %@ type. You may set an incompatible object to specific property in its binding notifier model.", NSStringFromSelector(_cmd), cls, [self class], [object class]];
-                NSCAssert([object isKindOfClass:cls] == YES, assertStr);
+                NSCAssert(object == nil || [object isKindOfClass:cls] == YES, assertStr);
 #else
                 if ([object isKindOfClass:cls] == NO)
                 {
