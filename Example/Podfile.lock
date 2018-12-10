@@ -1,19 +1,23 @@
 PODS:
-  - CCUIModel (0.0.1):
+  - CCUIModel (0.0.2):
     - CircleReferenceCheck
   - CircleReferenceCheck (0.0.1)
 
 DEPENDENCIES:
   - CCUIModel (from `../`)
 
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - CircleReferenceCheck
+
 EXTERNAL SOURCES:
   CCUIModel:
-    :path: ../
+    :path: "../"
 
 SPEC CHECKSUMS:
-  CCUIModel: cdae7aa9e4fa773b4d8efa70895d23ba108fd0b4
+  CCUIModel: e46b432e7116c38be569e02a061c28e95cfd6167
   CircleReferenceCheck: 5ef0dbaff301108a523f845bf81dfa9a12a83024
 
 PODFILE CHECKSUM: 2f760555e03d5bdfd6e4276ff7b7f49509d62555
 
-COCOAPODS: 1.4.0
+COCOAPODS: 1.5.3
