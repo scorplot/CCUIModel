@@ -135,7 +135,7 @@ metamacro_if_eq(1, metamacro_argcount(__VA_ARGS__))(keypath1(__VA_ARGS__))(keypa
 ([CCMCombine modelWithTarget:TARGET nilValue:NILVALUE][@keypath(TARGET, KEYPATH)])
 
 #define CCMNotifier(TARGET, ...) \
-    createNotifer(TARGET, @keypath(TARGET, __VA_ARGS__))
+    (CCUIModel*)createNotifer(TARGET, @keypath(TARGET, __VA_ARGS__))
 
 @interface CCMCombine : NSObject
 
