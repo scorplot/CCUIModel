@@ -368,7 +368,9 @@ void checkValidType(id self, SEL _cmd, id value)
                     }
                 }
                 
-                NSCAssert(value == nil || [value isKindOfClass:NSClassFromString(typeStr)] == YES, [NSString stringWithFormat:@"property %s %@ type in %@ can not be setted %@ type", propertyName, typeStr, [self class], [value class]]);
+                NSString* assertStr = [NSString stringWithFormat:@"property %s %@ type in %@ can not be setted %@ type", propertyName, typeStr, [self class], [value class]];
+                NSCAssert(value == nil || [value isKindOfClass:NSClassFromString(typeStr)] == YES, assertStr);
+                (void)assertStr;
                 
                 break;
             }
