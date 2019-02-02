@@ -1,5 +1,5 @@
 PODS:
-  - CCUIModel (0.0.2):
+  - CCUIModel (0.0.5):
     - CircleReferenceCheck
   - CircleReferenceCheck (0.0.1)
 
@@ -15,7 +15,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  CCUIModel: e46b432e7116c38be569e02a061c28e95cfd6167
+  CCUIModel: 6d946eda79734d58a12c7c7b90b52e1e382242a7
   CircleReferenceCheck: 5ef0dbaff301108a523f845bf81dfa9a12a83024
 
 PODFILE CHECKSUM: 2f760555e03d5bdfd6e4276ff7b7f49509d62555
