@@ -25,13 +25,17 @@
      
      [createNotifer(person, @"name") makeRelation:self WithSelector:@selector(hitTest:)];
 
+ 3. notifer with multi values
+    CCM(label, text) = CCMNotifier(self.model, name).plus(CCMNotifier(self.modle, age)).transfer2(^id(id name, id age) {
+        return [NSString stringWithFormat:@"My name is %@, I'm %@ years old", name, age];
+    });
  */
 
 /**
  report error:
  
  [CCUIModel reportError:^(const char* fileName, int line) {
- NSLog(@"%s ----- %d\n %@\n\n\n\n", fileName, line, [NSThread callStackSymbols]);
+     NSLog(@"%s ----- %d\n %@\n\n\n\n", fileName, line, [NSThread callStackSymbols]);
  }];
  
  */
@@ -56,6 +60,11 @@ typedef void (^errorBlock)(const char* fileName, int line);
 -(CCUIModel*)setTransfer5:(transferValue5)transfer;
 -(CCUIModel*)setTransferN:(transferValueN)transfer;
 
+-(CCUIModel* (^)(transferValue1))transfer;
+-(CCUIModel* (^)(transferValue2))transfer2;
+-(CCUIModel* (^)(transferValue3))transfer3;
+-(CCUIModel* (^)(transferValue4))transfer4;
+-(CCUIModel* (^)(transferValueN))transferN;
 
 /**
  when model changed, the selector from target will be called.
@@ -86,6 +95,26 @@ typedef void (^errorBlock)(const char* fileName, int line);
 +(void)makeRelation:(void(^)(void))block;
 
 + (void)reportError:(errorBlock)error;
+
+/**
+ Merge a series of value changes into one callback
+ CCM(label, text) = CCMNotifier(self.model, name).plus(CCMNotifier(self.modle, age)).transfer2(^id(id name, id age) {
+    return [NSString stringWithFormat:@"My name is %@, I'm %@ years old", name, age];
+ });
+ each name or age changes will set label.text.
+ It will set label.text once when group set name and age when commitGroup
+ */
++(void)beginGroup;
+
+/**
+ Merge a series of value changes into one callback
+ CCM(label, text) = CCMNotifier(self.model, name).plus(CCMNotifier(self.modle, age)).transfer2(^id(id name, id age) {
+ return [NSString stringWithFormat:@"My name is %@, I'm %@ years old", name, age];
+ });
+ each name or age changes will set label.text.
+ It will set label.text once when group set name and age when commitGroup
+ */
++(void)commitGroup;
     
 @end
 

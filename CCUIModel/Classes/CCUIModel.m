@@ -19,9 +19,14 @@ static NSMutableDictionary<NSString*, NSDictionary<NSString*, NSArray*>*>* __lis
 static NSMutableDictionary<NSString*, NSDictionary<NSString*, NSArray*>*>* __notifierSetterMethods;
 static NSMutableDictionary<NSNumber*, NSArray*>* __currentInformation;
 static NSMutableDictionary<NSNumber*, NSArray*>* __debugTraceInfomation;
+static NSMutableDictionary<NSNumber*, NSMutableArray*>* __groupInformation;
 
 static const void * __notifierDicKey;
 static const void * __listenerObjKey;
+
+static const void * __groupObjKey;
+static const void * __groupValueKey;
+static const void * __groupKeyKey;
 static errorBlock __errorReport;
 
 //block structure
@@ -190,35 +195,53 @@ static id  makeRelationWithSel(id listener, SEL sel, CCUIModel * fromNotifer);
 static void removeRelationWithProp(id object, NSString * prop);
 static void removeRelationWithSel(id object, SEL sel);
 
-static void notiferListener(NSArray* relations, NSObject* notifer, id value, NSString* prop) {
-    // get all relation notifer values, key->notiferPoint, value->value
-    NSMutableDictionary* allValue = [NSMutableDictionary dictionary];
-    [allValue setObject:value?value:__nilValue forKey:[NSString stringWithFormat:@"%p%@", notifer, prop]];
-    
+static void getherAllValues(NSArray* relations, NSMutableDictionary *allValue) {
+    id value = nil;
     // gether all values which listeners needs
     for (ObserverRelation* relation in relations) {
         for (NotiferInformation* info in relation.notifierInfos) {
             NSString* key = [NSString stringWithFormat:@"%p%@", info.notifer, info.prop];
             if ([allValue objectForKey:key] == nil) {
                 if (info.notifer == __nilValue)
-                    value = __nilValue;
+                value = __nilValue;
                 else
-                    value = [info.notifer valueForKey:info.prop];
+                value = [info.notifer valueForKey:info.prop];
                 [allValue setObject:value?value:__nilValue forKey:key];
             }
         }
     }
+}
+
+static void notiferListeners(NSArray* relations, NSMutableDictionary *allValue) {
+    NSMutableSet *sets = [[NSMutableSet alloc] init];
     
     [relations enumerateObjectsUsingBlock:^(ObserverRelation * _Nonnull relation, NSUInteger idx, BOOL * _Nonnull stop) {
-
-        // values the listener need.
-        NSMutableArray * values = [NSMutableArray array];
-
-        // get all values which listener need.
-        for (NotiferInformation * info in relation.notifierInfos) {
-            [values addObject: [allValue objectForKey:[NSString stringWithFormat:@"%p%@", info.notifer, info.prop]]];
+        // compute listener sig;
+        NSMutableString *sig = [[NSMutableString alloc] init];
+        if (relation.listenerProp) {
+            [sig appendFormat:@"%p_p_%@", relation.listener, relation.listenerProp];
+        } else if (relation.notiferBlock) {
+            [sig appendFormat:@"%p_b_%p", relation.listener, relation.notiferBlock];
+        } else {
+            [sig appendFormat:@"%p_s_%@", relation.listener, NSStringFromSelector(relation.notiferSelector)];
         }
         
+        // values the listener need.
+        NSMutableArray * values = [NSMutableArray array];
+        
+        // get all values which listener need.
+        for (NotiferInformation * info in relation.notifierInfos) {
+            NSString *key = [NSString stringWithFormat:@"%p%@", info.notifer, info.prop];
+            [sig appendString:key];
+            [values addObject: [allValue objectForKey:key]];
+        }
+        
+        if ([sets containsObject:sig]) {
+            return;
+        }
+        [sets addObject:sig];
+        // the same signature only callback once
+
         // transfer value if the transfer exist, the result is the final value will set to listener
         id result = nil;
         if (relation.transfer) {
@@ -230,7 +253,7 @@ static void notiferListener(NSArray* relations, NSObject* notifer, id value, NSS
         
         // set the obj to listener
         if (relation.listenerProp) {
-
+            
 #if DEBUG
             NSString *assertStr = [NSString stringWithFormat:@"property %@ %@ type in lisener %@ can not be setted %@ type. You may set an incompatible object to specific property in its binding notifier model.", relation.listenerProp, relation.listenerPropClass, [relation.listener class], [result class]];
             NSCAssert(result == nil || [result isKindOfClass:relation.listenerPropClass] == YES , assertStr);
@@ -275,6 +298,29 @@ static void notiferListener(NSArray* relations, NSObject* notifer, id value, NSS
             }
         }
     }];
+}
+
+static void notiferListener(NSArray* relations, NSObject* notifer, id value, NSString* prop) {
+    mach_port_t machTID = pthread_mach_thread_np(pthread_self());
+    @synchronized (__groupInformation) {
+        NSMutableArray *arr = [__groupInformation objectForKey:@(machTID)];
+        if (arr) {
+            NSObject *obj = [[NSObject alloc] init];
+            objc_setAssociatedObject(obj, &__groupObjKey, notifer, OBJC_ASSOCIATION_ASSIGN);
+            objc_setAssociatedObject(obj, &__groupValueKey, value, OBJC_ASSOCIATION_RETAIN);
+            objc_setAssociatedObject(obj, &__groupKeyKey, prop, OBJC_ASSOCIATION_RETAIN);
+            [arr addObject:obj];
+            return;
+        }
+    }
+
+    // get all relation notifer values, key->notiferPoint, value->value
+    NSMutableDictionary* allValue = [NSMutableDictionary dictionary];
+    [allValue setObject:value?value:__nilValue forKey:[NSString stringWithFormat:@"%p%@", notifer, prop]];
+    
+    getherAllValues(relations, allValue);
+    
+    notiferListeners(relations, allValue);
 }
 
 static NSArray * getListenerSetter(id self, SEL _cmd){
@@ -658,6 +704,7 @@ static id  makeRelationWithBlock(id listener, id block, CCUIModel * fromNotifer)
     __notifierSetterMethods = [NSMutableDictionary dictionary];
     __currentInformation = [NSMutableDictionary dictionary];
     __debugTraceInfomation = [NSMutableDictionary dictionary];
+    __groupInformation = [NSMutableDictionary dictionary];
     
     initListenerProperty([UIView class], @"hidden", [NSNumber class]);
     initListenerProperty([UIView class], @"clipsToBounds", [NSNumber class]);
@@ -797,6 +844,97 @@ static id  makeRelationWithBlock(id listener, id block, CCUIModel * fromNotifer)
     self.relation.transferParamNum = 5;
     return self;
 }
+
+-(CCUIModel* (^)(transferValue1))transfer {
+    typeof(self) ws = self;
+    return ^(transferValue1 trans) {
+        typeof(self) SELF = ws;
+        if (SELF) {
+            return [SELF setTransfer:trans];
+        }
+        return SELF;
+    };
+}
+-(CCUIModel* (^)(transferValue2))transfer2 {
+    typeof(self) ws = self;
+    return ^(transferValue2 trans) {
+        typeof(self) SELF = ws;
+        if (SELF) {
+            return [SELF setTransfer2:trans];
+        }
+        return SELF;
+    };
+}
+-(CCUIModel* (^)(transferValue3))transfer3 {
+    typeof(self) ws = self;
+    return ^(transferValue3 trans) {
+        typeof(self) SELF = ws;
+        if (SELF) {
+            return [SELF setTransfer3:trans];
+        }
+        return SELF;
+    };
+}
+-(CCUIModel* (^)(transferValue4))transfer4 {
+    typeof(self) ws = self;
+    return ^(transferValue4 trans) {
+        typeof(self) SELF = ws;
+        if (SELF) {
+            return [SELF setTransfer4:trans];
+        }
+        return SELF;
+    };
+}
+-(CCUIModel* (^)(transferValueN))transferN {
+    typeof(self) ws = self;
+    return ^(transferValueN trans) {
+        typeof(self) SELF = ws;
+        if (SELF) {
+            return [SELF setTransferN:trans];
+        }
+        return SELF;
+    };
+}
+
++(void)beginGroup {
+    mach_port_t machTID = pthread_mach_thread_np(pthread_self());
+    @synchronized (__groupInformation) {
+        NSMutableArray *arr = [__groupInformation objectForKey:@(machTID)];
+        if (arr == nil) {
+            arr = [[NSMutableArray alloc] init];
+            [__groupInformation setObject:arr forKey:@(machTID)];
+        }
+    }
+}
+
++(void)commitGroup {
+    mach_port_t machTID = pthread_mach_thread_np(pthread_self());
+    @synchronized (__groupInformation) {
+        NSMutableArray *arr = [__groupInformation objectForKey:@(machTID)];
+        if (arr) {
+            [__groupInformation removeObjectForKey:@(machTID)];
+            
+            NSMutableDictionary* allValue = [NSMutableDictionary dictionary];
+            NSMutableArray* relations = [[NSMutableArray alloc] init];
+            for (NSObject* obj in arr) {
+                NSObject* o = objc_getAssociatedObject(obj, &__groupObjKey);
+                id value = objc_getAssociatedObject(obj, &__groupValueKey);
+                NSString* prop = objc_getAssociatedObject(obj, &__groupKeyKey);
+                
+                NSMutableDictionary * dic = objc_getAssociatedObject(o, &__notifierDicKey);
+                NSMutableArray * rs = [dic objectForKey:prop];
+                if (rs) [relations addObjectsFromArray:rs];
+                [allValue setObject:value?value:__nilValue forKey:[NSString stringWithFormat:@"%p%@", o, prop]];
+            }
+                        
+            getherAllValues(relations, allValue);
+            
+            notiferListeners(relations, allValue);
+        }
+    }
+}
+
+
 
 -(id)idValue {
     id value = nil;
