@@ -19,16 +19,21 @@
  }];
  
  2. notifer post messages to block or selector
-     [createNotifer(person, @"name") makeRelation:self withBlock:^(id value) {
+     [CCMNotifier(person, name) makeRelation:self withBlock:^(id value) {
      
      }];
      
-     [createNotifer(person, @"name") makeRelation:self WithSelector:@selector(hitTest:)];
+     [CCMNotifier(person, name) makeRelation:self WithSelector:@selector(hitTest:)];
 
  3. notifer with multi values
     CCM(label, text) = CCMNotifier(self.model, name).plus(CCMNotifier(self.modle, age)).transfer2(^id(id name, id age) {
         return [NSString stringWithFormat:@"My name is %@, I'm %@ years old", name, age];
     });
+ 
+ 4. observer the value change
+     [CCMNotifier(person, name) addObserver:self withBlock:^(id value) {
+ 
+     }];
  */
 
 /**
@@ -84,6 +89,15 @@ typedef void (^errorBlock)(const char* fileName, int line);
  */
 -(void)makeRelation:(NSObject*)target withBlock:(void(^)(id value))block;
 
+/**
+ when model changed, the blocker will be called.
+ 
+ @param target target which observer model changed.
+ @param block the blocker which need to call when model changed
+ 
+ @return the current value of observer
+ */
+-(id)addObserver:(NSObject*)target withBlock:(void(^)(id value))block;
 
 /**
  A UI value may be combined with multi model value

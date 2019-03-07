@@ -765,21 +765,26 @@ static id  makeRelationWithBlock(id listener, id block, CCUIModel * fromNotifer)
 }
 
 
--(void)makeRelation:(NSObject *)object withBlock:(void (^)(id))block{
-    self.relation.listener = object;
+-(void)makeRelation:(NSObject *)target withBlock:(void (^)(id))block{
+    block([self addObserver:target withBlock:block]);
+}
+
+-(id)addObserver:(NSObject*)target withBlock:(void(^)(id value))block {
+    self.relation.listener = target;
     self.relation.notiferBlock = block;
     
-    id value  = makeRelationWithBlock(object, block, self);
-
-    NSAssert(!checkCircleReference(block, object), @"raise a block circle reference");
+    id value  = makeRelationWithBlock(target, block, self);
+    
+    NSAssert(!checkCircleReference(block, target), @"raise a block circle reference");
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-variable"
     for (id a in self.notifers) {
-        NSAssert(!checkCircleReference(a, object), @"raise a block circle reference");
+        NSAssert(!checkCircleReference(a, target), @"raise a block circle reference");
     }
 #pragma clang diagnostic pop
-    block(value);
+    return value;
 }
+
 
 -(void)makeRelation:(NSObject *)object WithSelector:(SEL)selector{
     self.relation.listener = object;
