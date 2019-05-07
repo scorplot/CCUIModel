@@ -133,33 +133,33 @@ typedef void (^errorBlock)(const char* fileName, int line);
 @end
 
 
-#define metamacro_concat(A, B) metamacro_concat_(A, B)
-#define metamacro_at(N, ...) metamacro_concat(metamacro_at, N)(__VA_ARGS__)
-#define metamacro_head(...) metamacro_head_(__VA_ARGS__, 0)
-#define metamacro_if_eq(A, B) metamacro_concat(metamacro_if_eq, A)(B)
+#define cc_metamacro_concat(A, B) cc_metamacro_concat_(A, B)
+#define cc_metamacro_at(N, ...) cc_metamacro_concat(cc_metamacro_at, N)(__VA_ARGS__)
+#define cc_metamacro_head(...) cc_metamacro_head_(__VA_ARGS__, 0)
+#define cc_metamacro_if_eq(A, B) cc_metamacro_concat(cc_metamacro_if_eq, A)(B)
 
-#define metamacro_argcount(...) \
-metamacro_at(2, __VA_ARGS__, 2, 1)
+#define cc_metamacro_argcount(...) \
+cc_metamacro_at(2, __VA_ARGS__, 2, 1)
 
-#define metamacro_dec(VAL) \
-metamacro_at(VAL, -1, 0, 1, 2)
+#define cc_metamacro_dec(VAL) \
+cc_metamacro_at(VAL, -1, 0, 1, 2)
 
-#define metamacro_concat_(A, B) A ## B
-#define metamacro_head_(FIRST, ...) FIRST
-#define metamacro_consume_(...)
-#define metamacro_expand_(...) __VA_ARGS__
+#define cc_metamacro_concat_(A, B) A ## B
+#define cc_metamacro_head_(FIRST, ...) FIRST
+#define cc_metamacro_consume_(...)
+#define cc_metamacro_expand_(...) __VA_ARGS__
 
-#define metamacro_at0(...) metamacro_head(__VA_ARGS__)
-#define metamacro_at1(_0, ...) metamacro_head(__VA_ARGS__)
-#define metamacro_at2(_0, _1, ...) metamacro_head(__VA_ARGS__)
+#define cc_metamacro_at0(...) cc_metamacro_head(__VA_ARGS__)
+#define cc_metamacro_at1(_0, ...) cc_metamacro_head(__VA_ARGS__)
+#define cc_metamacro_at2(_0, _1, ...) cc_metamacro_head(__VA_ARGS__)
 
-#define metamacro_if_eq0(VALUE) metamacro_concat(metamacro_if_eq0_, VALUE)
-#define metamacro_if_eq0_0(...) __VA_ARGS__ metamacro_consume_
-#define metamacro_if_eq0_1(...) metamacro_expand_
-#define metamacro_if_eq1(VALUE) metamacro_if_eq0(metamacro_dec(VALUE))
+#define cc_metamacro_if_eq0(VALUE) cc_metamacro_concat(cc_metamacro_if_eq0_, VALUE)
+#define cc_metamacro_if_eq0_0(...) __VA_ARGS__ cc_metamacro_consume_
+#define cc_metamacro_if_eq0_1(...) cc_metamacro_expand_
+#define cc_metamacro_if_eq1(VALUE) cc_metamacro_if_eq0(cc_metamacro_dec(VALUE))
 
 #define keypath(...) \
-metamacro_if_eq(1, metamacro_argcount(__VA_ARGS__))(keypath1(__VA_ARGS__))(keypath2(__VA_ARGS__))
+cc_metamacro_if_eq(1, cc_metamacro_argcount(__VA_ARGS__))(keypath1(__VA_ARGS__))(keypath2(__VA_ARGS__))
 
 #define keypath1(PATH) \
 (((void)(NO && ((void)PATH, NO)), strchr(# PATH, '.') + 1))
@@ -169,7 +169,7 @@ metamacro_if_eq(1, metamacro_argcount(__VA_ARGS__))(keypath1(__VA_ARGS__))(keypa
 
 #define CCM(TARGET, ...) \
     [CCMCombine debugTrace:__FILE__ line:__LINE__]; \
-    metamacro_if_eq(1, metamacro_argcount(__VA_ARGS__)) \
+    cc_metamacro_if_eq(1, cc_metamacro_argcount(__VA_ARGS__)) \
     (CCM_(TARGET, __VA_ARGS__, nil)) \
     (CCM_(TARGET, __VA_ARGS__))
 
