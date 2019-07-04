@@ -180,6 +180,9 @@ cc_metamacro_if_eq(1, cc_metamacro_argcount(__VA_ARGS__))(keypath1(__VA_ARGS__))
 #define CCMNotifier(TARGET, ...) \
     (CCUIModel*)createNotifer(TARGET, @keypath(TARGET, __VA_ARGS__))
 
+#define CCMWeakNotifier(TARGET, ...) \
+    (CCUIModel*)createWeakNotifer(TARGET, @keypath(TARGET, __VA_ARGS__))
+
 @interface CCMCombine : NSObject
 
 + (void)debugTrace:(const char*)file line:(int)line;
@@ -199,6 +202,16 @@ cc_metamacro_if_eq(1, cc_metamacro_argcount(__VA_ARGS__))(keypath1(__VA_ARGS__))
  @return CCUIModel with object and property name
 */
 CCUIModel* createNotifer(id notifier, NSString* propName);
+
+/**
+ create a weak reference CCUIModel with object and property name
+ 
+ @param notifier notifer object
+ @param propName notifer property
+ @return CCUIModel with object and property name
+ */
+CCUIModel* createWeakNotifer(id notifier, NSString* propName);
+
 
 /**
  create a CCUIModel with none relation

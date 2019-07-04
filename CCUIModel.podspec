@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
     s.name             = 'CCUIModel'
-    s.version          = '0.1.1'
+    s.version          = '0.1.2'
     s.summary          = 'A usefull libraray which make UI drived by model'
 
     s.description      = <<-DESC

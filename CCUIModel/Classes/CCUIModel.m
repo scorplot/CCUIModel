@@ -48,6 +48,7 @@ struct Block_descriptor {
 };
 
 @interface NotiferInformation : NSObject
+@property (nonatomic, strong) NSString* sig;
 @property (nonatomic, weak) NSObject* notifer;
 @property (nonatomic, copy) NSString* prop;
 @end
@@ -165,11 +166,13 @@ struct Block_descriptor {
     NSArray * notifers = self.notifierInfos;
     for (NotiferInformation*  info in notifers) {
         id notifer = info.notifer;
-        @synchronized (notifer) {
-            NSMutableDictionary * modeContent = objc_getAssociatedObject(notifer, &__notifierDicKey);
-            [modeContent enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, NSMutableArray*  _Nonnull relations, BOOL * _Nonnull stop) {
-                [relations removeObjectIdenticalTo:self];
-            }];
+        if (notifer) {
+            @synchronized (notifer) {
+                NSMutableDictionary * modeContent = objc_getAssociatedObject(notifer, &__notifierDicKey);
+                [modeContent enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, NSMutableArray*  _Nonnull relations, BOOL * _Nonnull stop) {
+                    [relations removeObjectIdenticalTo:self];
+                }];
+            }
         }
     }
     [self.notifierInfos removeAllObjects];
@@ -195,18 +198,21 @@ static id  makeRelationWithSel(id listener, SEL sel, CCUIModel * fromNotifer);
 static void removeRelationWithProp(id object, NSString * prop);
 static void removeRelationWithSel(id object, SEL sel);
 
+static NSString* getNotifierPropKey(NSObject* notifer, NSString* prop) {
+    return [NSString stringWithFormat:@"%p%@", notifer, prop];
+}
+
 static void getherAllValues(NSArray* relations, NSMutableDictionary *allValue) {
     id value = nil;
     // gether all values which listeners needs
     for (ObserverRelation* relation in relations) {
         for (NotiferInformation* info in relation.notifierInfos) {
-            NSString* key = [NSString stringWithFormat:@"%p%@", info.notifer, info.prop];
-            if ([allValue objectForKey:key] == nil) {
-                if (info.notifer == __nilValue)
-                value = __nilValue;
+            if ([allValue objectForKey:info.sig] == nil) {
+                if (info.notifer == __nilValue || info.notifer == nil)
+                    value = __nilValue;
                 else
-                value = [info.notifer valueForKey:info.prop];
-                [allValue setObject:value?value:__nilValue forKey:key];
+                    value = [info.notifer valueForKey:info.prop];
+                [allValue setObject:value?value:__nilValue forKey:info.sig];
             }
         }
     }
@@ -231,9 +237,8 @@ static void notiferListeners(NSArray* relations, NSMutableDictionary *allValue) 
         
         // get all values which listener need.
         for (NotiferInformation * info in relation.notifierInfos) {
-            NSString *key = [NSString stringWithFormat:@"%p%@", info.notifer, info.prop];
-            [sig appendString:key];
-            [values addObject: [allValue objectForKey:key]];
+            [sig appendFormat:@"_%@", info.sig];
+            [values addObject: [allValue objectForKey:info.sig]];
         }
         
         if ([sets containsObject:sig]) {
@@ -316,7 +321,7 @@ static void notiferListener(NSArray* relations, NSObject* notifer, id value, NSS
 
     // get all relation notifer values, key->notiferPoint, value->value
     NSMutableDictionary* allValue = [NSMutableDictionary dictionary];
-    [allValue setObject:value?value:__nilValue forKey:[NSString stringWithFormat:@"%p%@", notifer, prop]];
+    [allValue setObject:value?value:__nilValue forKey:getNotifierPropKey(notifer, prop)];
     
     getherAllValues(relations, allValue);
     
@@ -527,7 +532,7 @@ static void replaced_listener_setter_id_IMP(__unsafe_unretained id self, SEL _cm
                 NSString *assertStr = [NSString stringWithFormat:@"method %@ argument %@ type in lisener %@ can not be setted %@ type. You may set an incompatible object to specific property in its binding notifier model.", NSStringFromSelector(_cmd), cls, [self class], [object class]];
                 NSCAssert(object == nil || [object isKindOfClass:cls] == YES, assertStr);
 #else
-                if ([object isKindOfClass:cls] == NO)
+                if (object && [object isKindOfClass:cls] == NO)
                 {
                     if (__errorReport != nil)
                     {
@@ -611,12 +616,13 @@ static void removeRelationWithBlock(id object, id block){
 static void addRelation(CCUIModel* uimodel){
     
     for (NotiferInformation * info in uimodel.relation.notifierInfos) {
-        if (info.notifer) {
-            @synchronized (info.notifer) {
-                NSMutableDictionary * dic = objc_getAssociatedObject(info.notifer, &__notifierDicKey);
+        id notifer = info.notifer;
+        if (notifer) {
+            @synchronized (notifer) {
+                NSMutableDictionary * dic = objc_getAssociatedObject(notifer, &__notifierDicKey);
                 if (!dic) {
                     dic = [NSMutableDictionary dictionary];
-                    objc_setAssociatedObject(info.notifer, &__notifierDicKey, dic, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+                    objc_setAssociatedObject(notifer, &__notifierDicKey, dic, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                 }
                 NSMutableArray * relations = [dic objectForKey:info.prop];
                 if (!relations) {
@@ -677,10 +683,7 @@ static id  makeRelationWithSel(id listener, SEL sel, CCUIModel * fromNotifer){
     return value;
 }
 
-static id  makeRelationWithBlock(id listener, id block, CCUIModel * fromNotifer){
-    fromNotifer.relation.listener = listener;
-    fromNotifer.relation.notiferBlock = block;
-    
+static id makeRelationWithBlock(CCUIModel * fromNotifer){
     removeRelationWithBlock(fromNotifer.relation.listener, fromNotifer.relation.notiferBlock);
     addRelation(fromNotifer);
     
@@ -770,10 +773,11 @@ static id  makeRelationWithBlock(id listener, id block, CCUIModel * fromNotifer)
 }
 
 -(id)addObserver:(NSObject*)target withBlock:(void(^)(id value))block {
+    if (target == nil || block == nil) return nil;
     self.relation.listener = target;
     self.relation.notiferBlock = block;
     
-    id value  = makeRelationWithBlock(target, block, self);
+    id value  = makeRelationWithBlock(self);
     
     NSAssert(!checkCircleReference(block, target), @"raise a block circle reference");
 #pragma clang diagnostic push
@@ -784,7 +788,6 @@ static id  makeRelationWithBlock(id listener, id block, CCUIModel * fromNotifer)
 #pragma clang diagnostic pop
     return value;
 }
-
 
 -(void)makeRelation:(NSObject *)object WithSelector:(SEL)selector{
     self.relation.listener = object;
@@ -1065,17 +1068,43 @@ static id  makeRelationWithBlock(id listener, id block, CCUIModel * fromNotifer)
 @end
 
 id createNotifer(id notifer, NSString * prop){
+    if (notifer == nil) {
+        return nil;
+    }
     CCUIModel * uimodel = [[CCUIModel alloc] init];
     
     uimodel.relation = [[ObserverRelation alloc] init];
     NotiferInformation * info = [[NotiferInformation alloc] init];
     info.notifer = notifer;
     info.prop = prop;
+    info.sig = getNotifierPropKey(notifer, prop);
     [uimodel.relation.notifierInfos addObject:info];
     
     id value = [notifer valueForKey:prop];
     [uimodel.values addObject:value?value:__nilValue];
     [uimodel.notifers addObject:notifer?notifer:__nilValue];
+    
+    initNotifierProperty([notifer class], prop);
+    
+    return uimodel;
+}
+
+id createWeakNotifer(id notifer, NSString * prop){
+    if (notifer == nil) {
+        return nil;
+    }
+    CCUIModel * uimodel = [[CCUIModel alloc] init];
+    
+    uimodel.relation = [[ObserverRelation alloc] init];
+    NotiferInformation * info = [[NotiferInformation alloc] init];
+    info.notifer = notifer;
+    info.prop = prop;
+    info.sig = getNotifierPropKey(notifer, prop);
+    [uimodel.relation.notifierInfos addObject:info];
+    
+    id value = [notifer valueForKey:prop];
+    [uimodel.values addObject:value?value:__nilValue];
+    //[uimodel.notifers addObject:notifer?notifer:__nilValue];
     
     initNotifierProperty([notifer class], prop);
     
