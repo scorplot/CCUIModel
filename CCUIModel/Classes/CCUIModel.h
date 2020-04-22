@@ -158,7 +158,7 @@ cc_metamacro_at(VAL, -1, 0, 1, 2)
 #define cc_metamacro_if_eq0_1(...) cc_metamacro_expand_
 #define cc_metamacro_if_eq1(VALUE) cc_metamacro_if_eq0(cc_metamacro_dec(VALUE))
 
-#define keypath(...) \
+#define cc_keypath(...) \
 cc_metamacro_if_eq(1, cc_metamacro_argcount(__VA_ARGS__))(keypath1(__VA_ARGS__))(keypath2(__VA_ARGS__))
 
 #define keypath1(PATH) \
@@ -175,13 +175,13 @@ cc_metamacro_if_eq(1, cc_metamacro_argcount(__VA_ARGS__))(keypath1(__VA_ARGS__))
 
 /// Do not use this directly. Use the CCM macro above.
 #define CCM_(TARGET, KEYPATH, NILVALUE) \
-([CCMCombine modelWithTarget:TARGET nilValue:NILVALUE][@keypath(TARGET, KEYPATH)])
+([CCMCombine modelWithTarget:TARGET nilValue:NILVALUE][@cc_keypath(TARGET, KEYPATH)])
 
 #define CCMNotifier(TARGET, ...) \
-    (CCUIModel*)createNotifer(TARGET, @keypath(TARGET, __VA_ARGS__))
+    (CCUIModel*)createNotifer(TARGET, @cc_keypath(TARGET, __VA_ARGS__))
 
 #define CCMWeakNotifier(TARGET, ...) \
-    (CCUIModel*)createWeakNotifer(TARGET, @keypath(TARGET, __VA_ARGS__))
+    (CCUIModel*)createWeakNotifer(TARGET, @cc_keypath(TARGET, __VA_ARGS__))
 
 @interface CCMCombine : NSObject
 
