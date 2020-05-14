@@ -29,6 +29,8 @@ static const void * __groupValueKey;
 static const void * __groupKeyKey;
 static errorBlock __errorReport;
 
+typedef id(^loadWeak)(void);
+
 //block structure
 struct Block_layout {
     void *isa;
@@ -311,7 +313,11 @@ static void notiferListener(NSArray* relations, NSObject* notifer, id value, NSS
         NSMutableArray *arr = [__groupInformation objectForKey:@(machTID)];
         if (arr) {
             NSObject *obj = [[NSObject alloc] init];
-            objc_setAssociatedObject(obj, &__groupObjKey, notifer, OBJC_ASSOCIATION_ASSIGN);
+            __weak id wn = notifer;
+            loadWeak lw = ^(void) {
+                return wn;
+            };
+            objc_setAssociatedObject(obj, &__groupObjKey, lw, OBJC_ASSOCIATION_RETAIN);
             objc_setAssociatedObject(obj, &__groupValueKey, value, OBJC_ASSOCIATION_RETAIN);
             objc_setAssociatedObject(obj, &__groupKeyKey, prop, OBJC_ASSOCIATION_RETAIN);
             [arr addObject:obj];
@@ -925,7 +931,8 @@ static id makeRelationWithBlock(CCUIModel * fromNotifer){
             NSMutableDictionary* allValue = [NSMutableDictionary dictionary];
             NSMutableArray* relations = [[NSMutableArray alloc] init];
             for (NSObject* obj in arr) {
-                NSObject* o = objc_getAssociatedObject(obj, &__groupObjKey);
+                loadWeak lw = objc_getAssociatedObject(obj, &__groupObjKey);
+                NSObject* o = lw?lw():nil;
                 id value = objc_getAssociatedObject(obj, &__groupValueKey);
                 NSString* prop = objc_getAssociatedObject(obj, &__groupKeyKey);
                 
