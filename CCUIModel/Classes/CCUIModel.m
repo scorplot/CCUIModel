@@ -1120,6 +1120,7 @@ id createWeakNotifer(id notifer, NSString * prop){
 
 id createDummy(){
     CCUIModel * temp = [[CCUIModel alloc] init];
+    temp.relation = [[ObserverRelation alloc] init];
     temp.dummy = YES;
     @synchronized (__currentInformation) {
         mach_port_t machTID = pthread_mach_thread_np(pthread_self());
