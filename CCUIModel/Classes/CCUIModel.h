@@ -11,7 +11,8 @@
 /**
  How to use，
  1. CCM CCMNotifier
-    CCM(label, text) = CCMNotifier(person, name);
+    CCM(label, text) = CCMNotifier(person, name);  // label strong reference person object
+    CCM(label, text) = CCMWeakNotifier(person, name); // label weak reference person object
  
  2. id type property
     [CCUIModel makeRelation:^(void) {
