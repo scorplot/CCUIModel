@@ -10,27 +10,27 @@
 
 /**
  How to use，
- 0. CCM CCMNotifier
- CCM(label, text) = CCMNotifier(person, name);
+ 1. CCM CCMNotifier
+    CCM(label, text) = CCMNotifier(person, name);
  
- 1. id type property
- [CCUIModel makeRelation:^(void) {
-    label.text = createNotifer(person, @"name").idValue;
- }];
+ 2. id type property
+    [CCUIModel makeRelation:^(void) {
+        label.text = createNotifer(person, @"name").idValue;
+    }];
  
- 2. notifer post messages to block or selector
+ 3. notifer post messages to block or selector
      [CCMNotifier(person, name) makeRelation:self withBlock:^(id value) {
      
      }];
      
      [CCMNotifier(person, name) makeRelation:self WithSelector:@selector(hitTest:)];
 
- 3. notifer with multi values
+ 4. notifer with multi values
     CCM(label, text) = CCMNotifier(self.model, name).plus(CCMNotifier(self.modle, age)).transfer2(^id(id name, id age) {
         return [NSString stringWithFormat:@"My name is %@, I'm %@ years old", name, age];
     });
  
- 4. observer the value change
+ 5. observer the value change
      [CCMNotifier(person, name) addObserver:self withBlock:^(id value) {
  
      }];

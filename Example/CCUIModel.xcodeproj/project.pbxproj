@@ -296,7 +296,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-CCUIModel_Example/Pods-CCUIModel_Example-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-CCUIModel_Example/Pods-CCUIModel_Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CCUIModel/CCUIModel.framework",
 				"${BUILT_PRODUCTS_DIR}/CircleReferenceCheck/CircleReferenceCheck.framework",
 			);
@@ -307,7 +307,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CCUIModel_Example/Pods-CCUIModel_Example-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-CCUIModel_Example/Pods-CCUIModel_Example-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		AED17B25D49A715D5DB4076E /* [CP] Check Pods Manifest.lock */ = {

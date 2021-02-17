@@ -3,67 +3,42 @@
 CCUIModel is A usefull libraray which make UI drived by model
 
 How to use： 
-    UI property with single model relation
-        *directly make value：
-            * UI property type is id：
-            [CCUIModel makeRelation:^(void) {
-                label.text = createNotifer(person, @"name").idValue;
-            }];
-            * UI property type is bool：
-            [CCUIModel makeRelation:^(void) {
-                label.hidden = createNotifer(person, @"display").idValue.boolValue;
-            }];
-            * Need to transfer model value:
-            _label.text = [createNotifer(person, @"name") setTransfer:^id(id value) {
-                return [NSString stringWithFormat:@"name:%@",value];
-            }].idValue;
-        * call method or selector when model value changed:
-            * selector
-                [createNotifer(person, @"name") makeRelation:self WithSelector:@selector(setText:)];
-            * block
-                [createNotifer(person, @"name") makeRelation:self withBlock:^(id value) {
-                _label.text = value;
-                    }];
-    Sometimes UI propery will relate more than one model value：
-    We need to set a transfer under this circumstances.
-        * directly make value：
-
-            CCUIModel* uimodel = createNotifer(person, @"name").with(createNotifer(person, @"age")).with(createNotifer(person, @"title"));
-            [uimodel setTransfer3:^id(id name, id age, id title) {
-                return [NSString stringWithFormat:@"name:%@ age:%@ title:%@", name, age, title];
-            }];
-            _label.text = uimodel.idValue;
-        
-        * notify to selector
-            
-            CCUIModel* uimodel = createNotifer(person, @"name").with(createNotifer(person, @"age")).with(createNotifer(person, @"title"));
-            [uimodel setTransfer3:^id(id name, id age, id title) {
-                return [NSString stringWithFormat:@"name:%@ age:%@ title:%@", name, age, title];
-            }];
-            [uimodel addBind:self WithSelector:@selector(setText:)];
-        
-        * notify to block
-            
-            CCUIModel* uimodel = createNotifer(person, @"name").with(createNotifer(person, @"age")).with(createNotifer(person, @"title"));
-                [uimodel setTransfer3:^id(id name, id age, id title) {
-            return [NSString stringWithFormat:@"name:%@ age:%@ title:%@", name, age, title];
-            }];
-            [uimodel addBind:self withBlock:^(id value) {
-                _label.text = value;
-            }];
-
-    I have already init some propery default, If you need to make relation with new ui property, please do as following
-    bool initListenerProperty(Class  cls, NSString* prop);
-    init listener property
-
-
-
-
-## Example
-
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
-
-## Requirements
+### 1. CCM CCMNotifier
+```
+    CCM(label, text) = CCMNotifier(person, name);
+```
+### 2. id type property
+```
+    [CCUIModel makeRelation:^(void) {
+        label.text = createNotifer(person, @"name").idValue;
+    }];
+```
+### 3. notifer post messages to block or selector
+```
+     [CCMNotifier(person, name) makeRelation:self withBlock:^(id value) {
+     
+     }];
+     
+     [CCMNotifier(person, name) makeRelation:self WithSelector:@selector(hitTest:)];
+```
+### 4. notifer with multi values
+```
+    CCM(label, text) = CCMNotifier(self.model, name).plus(CCMNotifier(self.modle, age)).transfer2(^id(id name, id age) {
+        return [NSString stringWithFormat:@"My name is %@, I'm %@ years old", name, age];
+    });
+```
+### 5. observer the value change
+```
+     [CCMNotifier(person, name) addObserver:self withBlock:^(id value) {
+ 
+     }];
+```
+### report error:
+```
+ [CCUIModel reportError:^(const char* fileName, int line) {
+     NSLog(@"%s ----- %d\n %@\n\n\n\n", fileName, line, [NSThread callStackSymbols]);
+ }];
+```
 
 ## Installation
 
@@ -77,4 +52,5 @@ pod "CCUIModel"
 ## Author
 
 aruisi, scorplot@aliyun.com
+
 
