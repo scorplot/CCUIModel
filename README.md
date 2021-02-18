@@ -41,6 +41,98 @@ How to use：
  }];
 ```
 
+<table style="width:100%;" cellpadding="2" cellspacing="0" border="1" bordercolor="#000000">
+    <tbody>
+        <tr>
+            <td>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp;&nbsp;<b>__weak</b> UILabel *weakLabelName = labelName;
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; [RACObserve(_user, name) subscribeNext:^(<b>id</b>&nbsp; <b>_Nullable</b> x) {
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; <b>if</b> ([NSThread isMainThread]) {
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; weakLabelName.text = x;
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; } <b>else</b> {
+                </p>
+                <p style="font-family:Menlo;color:#6C36A9;background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; dispatch_async(dispatch_get_main_queue(), ^{
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; weakLabelName.text = x;
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; });
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; }
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; }];
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; <b>__weak</b> UILabel *weakLabelAge = labelAge;
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; [RACObserve(_user, name) subscribeNext:^(<b>id</b>&nbsp; <b>_Nullable</b> x) {
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; <b>if</b> ([NSThread isMainThread]) {
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; weakLabelAge.text = [NSString stringWithFormat:@"%@", x];
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; } <b>else</b> {
+                </p>
+                <p style="font-family:Menlo;color:#6C36A9;background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; dispatch_async(dispatch_get_main_queue(), ^{
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; weakLabelAge.text = [NSString stringWithFormat:@"%@", x];
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; });
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; }
+                </p>
+                <p style="font-family:Menlo;color:rgba(0, 0, 0, 0.85);background-color:#FFFFFF;">
+                    &nbsp; &nbsp; }];
+                </p>
+<br />
+            </td>
+            <td>
+                <br />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <br />
+            </td>
+            <td>
+                <br />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <br />
+            </td>
+            <td>
+                <br />
+            </td>
+        </tr>
+    </tbody>
+</table>
+<br />
+<p>
+    <br />
+</p>
 ## Installation
 
 CCUIModel is available through [CocoaPods](http://cocoapods.org). To install
