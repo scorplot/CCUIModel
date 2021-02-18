@@ -3,6 +3,15 @@
 CCUIModel is A usefull libraray which make UI drived by model
 
 # BenchMark
+|          | CCUIModel | ReactiveCocoa |KVO|
+| :----:| :----: | :----: | :----: |
+| 易用度 | ★★★★★ | ★★★ |★|
+| 析构函数 |无需操作|无需操作|非常复杂的操作|
+| crash率 | 小于0.01% | 容易用错，多线程容易crash | 特别容易crash |
+| 执行效率(在iPhoneX上设置2万次属性的时间) | 0.53 毫秒 | 0.63 毫秒 | 1.02 毫秒 | 
+| 根据crash report发现问题的难度 | ★ | ★★★★ | ★★★★★|
+
+详情：
 <table style="width:100%;" cellpadding="2" cellspacing="0" border="1" bordercolor="#000000">
     <tbody>
         <tr>
